@@ -1,0 +1,17 @@
+name: irys_network_tool
+author: ivan
+version: 0.1.0
+type: custom
+description: A tool that allows mech to interact with the Irys Network through their
+  Python SDK.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeigrv2henxnmggftvzsehrbehc2hzo77p55kl5yslxjhdf2j6wozxq
+  irys_network_tool.py: bafybeib35u3lvy4e3xsd4pcgbaddmcok2c4yidqadvbqzuy4thvuisauf4
+fingerprint_ignore_patterns: []
+entry_point: irys_network_tool.py
+callable: run
+dependencies:
+  requests:
+    version: '>=2.31.0'

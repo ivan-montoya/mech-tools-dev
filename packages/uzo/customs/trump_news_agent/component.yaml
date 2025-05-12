@@ -1,0 +1,22 @@
+name: trump_news_agent
+author: uzo
+version: 0.1.0
+type: custom
+description: A Skill for reporting news on trmp based issues
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeibrtsk7zngkkglxogjj6adxvlf5gnlqm56w7mv4t2bmogjwbiaylu
+  trump_news_agent.py: bafybeiava7c5cttaa44yttsqlbpe6al2jgrvkjejmuzsslo3t2kdemwywi
+fingerprint_ignore_patterns: []
+entry_point: trump_news_agent.py
+callable: run
+params:
+  default_model: gpt-4o-2024-08-06
+dependencies:
+  requests:
+    version: '>=2.31.0'
+  openai:
+    version: '>=1.65.5'
+  pydantic:
+    version: '>=2.10.6'

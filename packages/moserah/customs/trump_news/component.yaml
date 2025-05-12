@@ -1,0 +1,26 @@
+name: trump_news
+author: moserah
+version: 0.1.0
+type: custom
+description: A tool for tracking, analyzing, and reporting on news related to Donald
+  Trump with sentiment analysis and multiple reporting tones.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeia4j4fxm45d4fyuz7qcu2be3ol6qcgdqk3gcwhwa5j3u6yx72mgr4
+  __init__.py: bafybeibopfsaeo2ywpq62ifwecjkbyjtvscbo53ng7lrptoukaxl3wqs5e
+  trump_news.py: bafybeifm2wfydcp66upbs4aln5vgnfzykzrq4h3dqlrkfcv4n2gngeu73q
+fingerprint_ignore_patterns: []
+entry_point: trump_news.py
+callable: run
+dependencies:
+  nltk:
+    version: '>=3.9.1'
+  newsapi-python:
+    version: '>=0.2.7'
+  openai:
+    version: '>=1.65.5'
+  python-dotenv:
+    version: '>=0.21.1'
+  requests:
+    version: '>=2.31.0'

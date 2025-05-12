@@ -1,7 +1,15 @@
 {
     "dev": {
-        "agent/valory/mech/0.1.0": "bafybeibtwnrdkabckpwvcgemfnhmz7imtzaafr3433vfu4jmt6utdtuc6q",
-        "service/valory/mech/0.1.0": "bafybeiffu2kjfyauzfrub3unldkmvh5mlrib3ms3yomjfivlz2xqflnyza"
+        "custom/ivan/coinbase_commerce_request/0.1.0": "bafybeifhqzrz2t5dzhp2sibhmm7xruntvdo4gj5dci6izl5tqegmcflm3u",
+        "custom/ivan/coingecko_api/0.1.0": "bafybeifgtrw2h46zur4xv5ezfmdlcykh6tuhcll5w3bozgfhgm4wbcidta",
+        "custom/ivan/irys_network_tool/0.1.0": "bafybeigcnt4xl3rzmivf2tto35jeo7rtfuoxfbgce2f73dc5h5pc5y36qm",
+        "custom/jayshree/grid_pair_screener/0.1.0": "bafybeif3bkm7rcjmejenounri46u5kroja2ljtnuotzjpopmriicx6j5oe",
+        "custom/jisong/nft_appraisal_skill/0.1.0": "bafybeic26hztvkfwm3tvix54xvublm2mnmxv54g6nrdk3m5ubkanuvipja",
+        "custom/moserah/trump_news/0.1.0": "bafybeieymcwa7u47cognmiyuzbkattm37rqbf3wkblq75ilmrowztmuhvi",
+        "custom/uzo/grid_analyser/0.1.0": "bafybeiejg3o6m6gbgbs7nb5nz6xvjjcbpmm43ajsckaodo4r476wxlj67q",
+        "custom/uzo/trump_news_agent/0.1.0": "bafybeigdiiznrxsjvgz73vqmwaq2eggxzvlylav3n2vvxp7w5uegimxop4",
+        "agent/valory/mech/0.1.0": "bafybeihcjutx2hnrpncplcwzsmaguqekgwdatkxjcyqwwn33w7r4riko7i",
+        "service/valory/mech/0.1.0": "bafybeibenn4qjiz2qngoqblu7yq4n74di4z6fd2x6auwu3pzpyygnz3mty"
     },
     "third_party": {
         "protocol/valory/acn_data_share/0.1.0": "bafybeih5ydonnvrwvy2ygfqgfabkr47s4yw3uqxztmwyfprulwfsoe7ipq",
