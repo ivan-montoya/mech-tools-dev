@@ -15,3 +15,5 @@ callable: run
 dependencies:
   requests:
     version: '>=2.31.0'
+  irys-sdk:
+    version: '>=0.1.3'
