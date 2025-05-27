@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeiao7smkgwjw7z5epvkay6scjyf2upoqhtew7uhv6y4oltiefablny
-  coingecko_api.py: bafybeigp3uyc3iqblglk6rjde2kdsyjgyrbcapth4j6ctv5hnixmmq3mrq
+  coingecko_api.py: bafybeie7bdapzukote4ihnxxcl7v4siqbvb7yfvdqxespf4nfl2sxntg2y
 fingerprint_ignore_patterns: []
 entry_point: coingecko_api.py
 callable: run
