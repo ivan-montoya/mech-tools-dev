@@ -1,1 +1,0 @@
-"""This module contains the Trump News skill."""
