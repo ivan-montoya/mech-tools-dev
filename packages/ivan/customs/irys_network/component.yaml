@@ -1,4 +1,4 @@
-name: irys_network_tool
+name: irys_network
 author: ivan
 version: 0.1.0
 type: custom
@@ -8,12 +8,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeigrv2henxnmggftvzsehrbehc2hzo77p55kl5yslxjhdf2j6wozxq
-  irys_network_tool.py: bafybeib35u3lvy4e3xsd4pcgbaddmcok2c4yidqadvbqzuy4thvuisauf4
+  irys_network.py: bafybeihxctjmszhvdwymy6fxtyosl5xd44i35hurd4xvvpofxw6cifvcd4
 fingerprint_ignore_patterns: []
-entry_point: irys_network_tool.py
+entry_point: irys_network.py
 callable: run
 dependencies:
   requests:
-    version: '>=2.32.3'
+    version: '>=2.28.2'
   irys-sdk:
-    version: '>=0.1.7'
+    version: '>=0.1.8a3'

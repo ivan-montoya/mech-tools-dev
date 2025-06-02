@@ -2,19 +2,30 @@ import requests
 from typing import Any, Dict, Optional, Tuple, List, Callable
 import functools
 
-from irys_sdk.Builder import Builder
+from irys_sdk import Builder, DataItem, sign, create_data, EthereumSigner
 from irys_sdk.bundle.tags import Tags
-
 
 class IrysNetworkClient:
     def __init__(self, wallet: str):
-        self.client = Builder("ethereum").wallet(wallet).network("devnet").rpc_url("https://blissful-wild-uranium.ethereum-sepolia.quiknode.pro/ef19a9df3b775be8b295b8e1f01ca9067daf8e78/").build()
+        self.client = Builder("ethereum").wallet(wallet).network("devnet")
+        self.client.rpc_url("https://sepolia.drpc.org")
+        self.client = self.client.build()
+        self.wallet = wallet
 
     def address(self) -> str:
-        return self.client.token_config.address()
+        return self.client.address
 
     def upload(self, data: bytearray, tags: Tags = None, target: str = None, anchor: str = None):
-        return self.client.upload(data, tags, target, anchor)
+        upload_result = self.client.upload(data, tags, target, anchor)
+
+        # manually create and sign a data item
+        # (not required if the above ^ upload API works for your usecase)
+        signer = EthereumSigner(self.wallet)
+        tx = create_data(bytearray(), signer, tags=tags, anchor=anchor, target=target)
+        id = sign(tx, signer)
+        is_valid = DataItem.verify(tx.get_raw())
+
+        return upload_result
 
     def get_balance(self) -> int:
         return self.client.get_balance()
@@ -22,21 +33,21 @@ class IrysNetworkClient:
     def get_price(self, bytes: int) -> int:
         return self.client.get_price(bytes)
 
-    def fund(self, amount_atomic: int, multiplier=1.0):
-        return self.client.fund(amount_atomic, multiplier)
+    def fund(self, amount_atomic: int):
+        return self.client.fund(amount_atomic)
     
 
-def get_data(self, tx_id: str):
+def get_data(tx_id: str):
     url = f"https://gateway.irys.xyz/{tx_id}"
     response = requests.get(url)
 
-    return response.json()
+    return response.content
 
-def get_tx_metadata(self, tx_id: str):
+def get_tx_metadata(tx_id: str):
     url = f"https://gateway.irys.xyz/tx/{tx_id}"
     response = requests.get(url)
 
-    return response.json()
+    return response.content
 
 
 def error_response(msg: str) -> Tuple[str, None, None, None]:
@@ -84,7 +95,6 @@ def with_key_rotation(func: Callable):
 
     return wrapper
 
-
 @with_key_rotation
 def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
     # Check that the tool has been specified
@@ -94,22 +104,33 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
         return error_response("No command has been specified.")
     
     try:
-        client = IrysNetworkClient()
+        client = IrysNetworkClient(kwargs.get("wallet", None))
+
+        if client is None:
+            return error_response("No wallet has been specified.")
 
         if command_name == "address":
-            response = handle_address(client)
+            response = client.address()
         elif command_name == "upload":
-            response = handle_upload(client, **kwargs)
+            data = kwargs.get("data", None)
+            tags = kwargs.get("tags", None)
+            target = kwargs.get("target", None)
+            anchor = kwargs.get("anchor", None)
+            response = client.upload(data, tags, target, anchor)
         elif command_name == "get_balance":
-            response = handle_get_balance(client)
+            response = client.get_balance()
         elif command_name == "get_price":
-            response = handle_get_price(client, **kwargs)
+            bytes = kwargs.get("bytes", None)
+            response = client.get_price(int(bytes))
         elif command_name == "fund":
-            response = handle_fund(client, **kwargs)
+            amount_atomic = kwargs.get("amount_atomic", None)
+            response = client.fund(int(amount_atomic))
         elif command_name == "get_data":
-            response = handle_get_data(client, **kwargs)
+            tx_id = kwargs.get("tx_id", None)
+            response = get_data(tx_id)
         elif command_name == "get_tx_metadata":
-            response = handle_get_tx_metadata(client, **kwargs)
+            tx_id = kwargs.get("tx_id", None)
+            response = get_tx_metadata(tx_id)
         else:
             return error_response(
                 f"Command {command_name!r} is not in supported commands!"
@@ -119,32 +140,3 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
         return str(response), None, None, None
     except Exception as e:
         return f"An error occurred: {str(e)}", None, None, None
-
-def handle_address(client):
-    return client.address()
-
-def handle_upload(client, **kwargs):
-    data = kwargs.get("data", None)
-    tags = kwargs.get("tags", None)
-    target = kwargs.get("target", None)
-    anchor = kwargs.get("anchor", None)
-    return client.upload(data, tags, target, anchor)
-
-def handle_get_balance(client):
-    return client.get_balance()
-
-def handle_get_price(client, **kwargs):
-    bytes = kwargs.get("bytes", None)
-    return client.get_price(bytes)
-
-def handle_fund(client, **kwargs):
-    amount_atomic = kwargs.get("amount_atomic", None)
-    return client.fund(amount_atomic)
-
-def handle_get_data(client, **kwargs):
-    tx_id = kwargs.get("tx_id", None)
-    return client.get_data(tx_id)
-
-def handle_get_tx_metadata(client, **kwargs):
-    tx_id = kwargs.get("tx_id", None)
-    return client.get_tx_metadata(tx_id)
