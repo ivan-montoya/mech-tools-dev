@@ -49,9 +49,9 @@ skills:
 - valory/transaction_settlement_abci:0.1.0:bafybeicvfbyp4lfqcohmvw6ozlvsbp2eugl2wxqxsdpp36ro7bk3waxjky
 - valory/websocket_client:0.1.0:bafybeif7rrvsu6z4evqkhblxj3u6wwv2eqou576hgkyoehxuj7cntw7o2m
 customs:
-- ivan/coinbase_commerce_request:0.1.0:bafybeifhqzrz2t5dzhp2sibhmm7xruntvdo4gj5dci6izl5tqegmcflm3u
+- ivan/coinbase_commerce_request:0.1.0:bafybeia2ciheyadegftsbjdrdstiptapqvydhfu2sljzw5l6ebmyg4jibq
 - ivan/coingecko_api:0.1.0:bafybeih6u74bwh7rmcw5nbhd2ybpuojs3yyzpuvufewsgga4dhvujkdpue
-- ivan/irys_network:0.1.0:bafybeihh4f6hy7ebv5ge4ruxtkycgpxti6b73qslgec4cisg4q2nekezga
+- ivan/irys_network:0.1.0:bafybeidnko2qt3l7fa2dtwosbck6etx5wq6owppzg45b6ldrw6mu53feju
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -92,6 +92,8 @@ dependencies:
     version: ==2.28.2
   irys-sdk:
     version: ==0.1.8a3
+  typing_extensions:
+    version: ==4.12.2
 default_connection: null
 ---
 public_id: valory/websocket_client:0.1.0:bafybeiexove4oqyhoae5xmk2hilskthosov5imdp65olpgj3cfrepbouyy

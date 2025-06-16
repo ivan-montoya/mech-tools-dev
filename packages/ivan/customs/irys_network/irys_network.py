@@ -6,9 +6,13 @@ from irys_sdk import Builder, DataItem, sign, create_data, EthereumSigner
 from irys_sdk.bundle.tags import Tags
 
 class IrysNetworkClient:
-    def __init__(self, wallet: str):
-        self.client = Builder("ethereum").wallet(wallet).network("devnet")
-        self.client.rpc_url("https://sepolia.drpc.org")
+    def __init__(self, wallet: str, devnet: bool = False):
+        if devnet:
+            self.client = Builder("ethereum").wallet(wallet).network("devnet")
+            self.client.rpc_url("https://sepolia.drpc.org")
+        else:
+            self.client = Builder("ethereum").wallet(wallet)
+
         self.client = self.client.build()
         self.wallet = wallet
 
@@ -104,7 +108,7 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
         return error_response("No command has been specified.")
     
     try:
-        client = IrysNetworkClient(kwargs.get("wallet", None))
+        client = IrysNetworkClient(kwargs.get("wallet", None), kwargs.get("devnet", False))
 
         if client is None:
             return error_response("No wallet has been specified.")
@@ -137,6 +141,6 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
             )
 
         # Response, prompt, transaction, cost
-        return str(response), None, None, None
+        return str(response), command_name, None, None
     except Exception as e:
         return f"An error occurred: {str(e)}", None, None, None

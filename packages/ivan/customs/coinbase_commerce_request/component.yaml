@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeiafya3tax5voulmtq4gj52vbibyufvforxfld6476et7n4vfome7i
-  coinbase_commerce_request.py: bafybeidtowauw3hu33p3ni3cll3uigyjxuwp4ywk2okygg5pgmlp3nixym
+  coinbase_commerce_request.py: bafybeiaazaqihjtsz3qpwicrodj4vcpdxtzflcedavia2ois4md2zjppuy
 fingerprint_ignore_patterns: []
 entry_point: coinbase_commerce_request.py
 callable: run
