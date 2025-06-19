@@ -1,5 +1,5 @@
 import requests
-from typing import Any, Dict, Optional, Tuple, List, Callable
+from typing import Any, Dict, Optional, Tuple, Callable
 import functools
 
 from irys_sdk import Builder, DataItem, sign, create_data, EthereumSigner
@@ -10,10 +10,11 @@ class IrysNetworkClient:
         if devnet:
             self.client = Builder("ethereum").wallet(wallet).network("devnet")
             self.client.rpc_url("https://sepolia.drpc.org")
+            self.client = self.client.build()
         else:
             self.client = Builder("ethereum").wallet(wallet)
+            self.client = self.client.build()
 
-        self.client = self.client.build()
         self.wallet = wallet
 
     def address(self) -> str:
@@ -108,10 +109,17 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
         return error_response("No command has been specified.")
     
     try:
-        client = IrysNetworkClient(kwargs.get("wallet", None), kwargs.get("devnet", False))
+        api_keys = kwargs.get("api_keys", None)
+        wallet = api_keys.get("irys_wallet", None)
+
+        if wallet is None:
+            return error_response("No wallet has been specified.")
+        
+        devnet = kwargs.get("devnet", False)
+        client = IrysNetworkClient(wallet, devnet)
 
         if client is None:
-            return error_response("No wallet has been specified.")
+            return error_response("Error creating Irys network client.")
 
         if command_name == "address":
             response = client.address()
