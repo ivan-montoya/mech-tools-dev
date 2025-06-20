@@ -126,17 +126,19 @@ def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
         elif command_name == "upload":
             data = kwargs.get("data", None)
             tags = kwargs.get("tags", None)
+            if isinstance(tags, str):
+                    tags = eval(tags)
             target = kwargs.get("target", None)
             anchor = kwargs.get("anchor", None)
             response = client.upload(data, tags, target, anchor)
-        elif command_name == "get_balance":
-            response = client.get_balance()
+        #elif command_name == "get_balance":
+        #    response = client.get_balance()
         elif command_name == "get_price":
             bytes = kwargs.get("bytes", None)
             response = client.get_price(int(bytes))
-        elif command_name == "fund":
-            amount_atomic = kwargs.get("amount_atomic", None)
-            response = client.fund(int(amount_atomic))
+        #elif command_name == "fund":
+        #    amount_atomic = kwargs.get("amount_atomic", None)
+        #    response = client.fund(int(amount_atomic))
         elif command_name == "get_data":
             tx_id = kwargs.get("tx_id", None)
             response = get_data(tx_id)

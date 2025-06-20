@@ -51,7 +51,7 @@ skills:
 customs:
 - ivan/coinbase_commerce_request:0.1.0:bafybeia2ciheyadegftsbjdrdstiptapqvydhfu2sljzw5l6ebmyg4jibq
 - ivan/coingecko_api:0.1.0:bafybeih6u74bwh7rmcw5nbhd2ybpuojs3yyzpuvufewsgga4dhvujkdpue
-- ivan/irys_network:0.1.0:bafybeicpwhzlxev6grbh5auvjqa7elt55r7gj5x4wmwvahhp6aqlkqk7qy
+- ivan/irys_network:0.1.0:bafybeicvzo2yp55pebte4c5qpq2xjk2gz5w2sjet62fv463dstbekzr4ui
 default_ledger: ethereum
 required_ledgers:
 - ethereum

@@ -2,9 +2,9 @@
     "dev": {
         "custom/ivan/coinbase_commerce_request/0.1.0": "bafybeia2ciheyadegftsbjdrdstiptapqvydhfu2sljzw5l6ebmyg4jibq",
         "custom/ivan/coingecko_api/0.1.0": "bafybeih6u74bwh7rmcw5nbhd2ybpuojs3yyzpuvufewsgga4dhvujkdpue",
-        "custom/ivan/irys_network/0.1.0": "bafybeicpwhzlxev6grbh5auvjqa7elt55r7gj5x4wmwvahhp6aqlkqk7qy",
-        "agent/valory/mech/0.1.0": "bafybeiev5zgetrpy3ps6qgixcqg36voghqr5gbetmyagyidfbef3pnuxua",
-        "service/valory/mech/0.1.0": "bafybeienn3j5dkl6vswtpr5bnd6hiknspqjkwcdrqqeizi2vttzme3fp6m"
+        "custom/ivan/irys_network/0.1.0": "bafybeicvzo2yp55pebte4c5qpq2xjk2gz5w2sjet62fv463dstbekzr4ui",
+        "agent/valory/mech/0.1.0": "bafybeifa4rkmwmmdvggzst4e2uffis3kx5etrjadhl62nlrhodgrk7gnri",
+        "service/valory/mech/0.1.0": "bafybeihhauvrzcmlanjcppfto3w7yqllvpncfxebfqg2lng7sarroesooy"
     },
     "third_party": {
         "protocol/valory/acn_data_share/0.1.0": "bafybeih5ydonnvrwvy2ygfqgfabkr47s4yw3uqxztmwyfprulwfsoe7ipq",
