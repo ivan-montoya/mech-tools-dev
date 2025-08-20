@@ -30,50 +30,12 @@ class CoingeckoAPI:
 
     # Simple API endpoint definitions
 
-    def coin_price_by_id(
-        self,
-        ids: str,
-        vs_currencies: str,
-        include_market_cap: bool = False,
-        include_24hr_vol: bool = False,
-        include_24hr_change: bool = False,
-        include_last_updated_at: bool = False,
-        precision: Optional[str] = None,
-    ) -> str:
-        """
-        Get the price of one or more coins by their ids.
-
-        Args:
-            ids: Coins' ids, comma-separated if querying more than 1 coin. Refers to /coins/list.
-            vs_currencies: Target currency of coins, comma-separated if querying more than 1 currency.
-                Refers to /simple/supported_vs_currencies.
-            include_market_cap: Include market cap. Default: False
-            include_24hr_vol: Include 24hr volume. Default: False
-            include_24hr_change: Include 24hr change. Default: False
-            include_last_updated_at: Include last updated price time in UNIX. Default: False
-            precision: Decimal place for currency price value
-
-        Returns:
-            str: Price information for the requested coins
-        """
+    def coin_price_by_id(self, query_params: Optional[dict[Any, Any]] = None) -> str:
         base_url = "https://api.coingecko.com/api/v3/simple/price"
-        params = {
-            "ids": ids,
-            "vs_currencies": vs_currencies
-        }
-        
-        if include_market_cap:
-            params["include_market_cap"] = "true"
-        if include_24hr_vol:
-            params["include_24hr_vol"] = "true"
-        if include_24hr_change:
-            params["include_24hr_change"] = "true"
-        if include_last_updated_at:
-            params["include_last_updated_at"] = "true"
-        if precision is not None:
-            params["precision"] = precision
-            
-        url = f"{base_url}?" + "&".join(f"{k}={v}" for k, v in params.items())
+        if query_params is not None:
+            url = f"{base_url}?" + "&".join(f"{k}={v}" for k, v in query_params.items())
+        else:
+            url = base_url
 
         headers = {
             "accept": "application/json",
@@ -82,7 +44,6 @@ class CoingeckoAPI:
 
         response = requests.get(url, headers=headers)
         return response.json()
-
 
     def coin_price_by_token_address(
         self,
@@ -385,30 +346,10 @@ class CoingeckoAPI:
 
         return response.json()  
 
-    def coin_historical_chart_data_by_id(
-        self,
-        id: str,
-        vs_currency: str,
-        days: str,
-        interval: Optional[str] = None,
-        precision: Optional[str] = None
-    ) -> str:
-        """
-        Get historical market data including price, market cap, and 24h volume.
+    def coin_historical_chart_data_by_id(self, path_params: dict[Any, Any], query_params: dict[Any, Any]) -> str:
+        base_url = f"https://api.coingecko.com/api/v3/coins/{path_params['id']}/market_chart"
 
-        Args:
-            id: The coin id (refers to /coins/list)
-            vs_currency: The target currency of market data (refers to /simple/supported_vs_currencies)
-            days: Data up to number of days ago (can be any integer)
-            interval: Data interval. Leave empty for auto granularity. Possible value: daily
-            precision: Decimal place for currency price value
-
-        Returns:
-            str: JSON response containing historical market data
-        """
-        base_url = f"https://api.coingecko.com/api/v3/coins/{id}/market_chart"
-
-        url = f"{base_url}?vs_currency={vs_currency}&days={days}"
+        url = f"{base_url}?vs_currency={query_params['vs_currency']}&days={query_params['days']}"
 
         if interval is not None:
             url = f"{url}&interval={interval}"
@@ -1194,160 +1135,15 @@ def error_response(msg: str) -> Tuple[str, None, None, None]:
     return msg, None, None, None
 
 
-MechResponse = Tuple[str, Optional[str], Optional[Dict[str, Any]], Any, Any]
+# Command Handlers
 
-
-def with_key_rotation(func: Callable):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> MechResponse:
-        api_keys = kwargs["api_keys"]
-        retries_left: Dict[str, int] = api_keys.max_retries()
-
-        def execute() -> MechResponse:
-            """Retry the function with a new key."""
-            try:
-                result = func(*args, **kwargs)
-                return result + (api_keys,)
-            except Exception as e:
-                service = e.__class__.__name__.lower()
-                if (
-                    hasattr(e, "status_code") and e.status_code == 429
-                ):  # If rate limit exceeded
-                    if retries_left.get(service, 0) <= 0:
-                        raise e
-                    retries_left[service] -= 1
-                    api_keys.rotate(service)
-                    return execute()
-
-                return str(e), "", None, None, api_keys
-
-        mech_response = execute()
-        return mech_response
-
-    return wrapper
-
-
-@with_key_rotation
-def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
-    """
-    Main entry point for executing Coinbase Commerce API operations.
-
-    Args:
-        **kwargs: Keyword arguments including:
-            - tool: Name of the tool/operation to execute
-            - api_key: Coinbase Commerce API key
-            - Additional arguments specific to each tool
-
-    Returns:
-        A tuple containing:
-        - Response string from the API
-        - Optional prompt sent to the model
-        - Optional transaction generated by the tool
-        - Optional cost calculation object
-    """
-    api_keys = kwargs["api_keys"]
-    coingecko_api_key = api_keys.get("coingecko", None)
-    # Check that the tool has been specified
-    command_name = kwargs.get("prompt", None)
-
-    coingecko_api = CoingeckoAPI(coingecko_api_key)
-
-    if command_name is None:
-        return error_response("No command has been specified.")
-    
-    try:
-        if command_name == "Check API server status": # Ping
-            response = handle_check_api_server_status(coingecko_api)
-        elif command_name == "Coin Price by IDs and Symbols": # Simple
-            response = handle_coin_price_by_id(coingecko_api, **kwargs)
-        elif command_name == "Coin Price by Token Addresses":
-            response = handle_coin_price_by_token_address(coingecko_api, **kwargs)
-        elif command_name == "Supported Currencies List":
-            response = handle_supported_currencies_list(coingecko_api)
-        elif command_name == "Coins List (ID Map)": # Coins
-            response = handle_coins_list(coingecko_api, **kwargs)
-        elif command_name == "Coins List with Market Data":
-            response = handle_coins_list_with_market_data(coingecko_api, **kwargs)
-        elif command_name == "Coin Data by ID":
-            response = handle_coin_data_by_id(coingecko_api, **kwargs)
-        elif command_name == "Coin Tickers by ID":
-            response = handle_coin_tickers_by_id(coingecko_api, **kwargs)
-        elif command_name == "Coin Historical Data by ID":
-            response = handle_coin_historical_data_by_id(coingecko_api, **kwargs)
-        elif command_name == "Coin Historical Chart Data by ID":
-            response = handle_coin_historical_chart_data_by_id(coingecko_api, **kwargs)
-        elif command_name == "Coin Historical Chart Data within Time Range by ID":
-            response = handle_coin_historical_chart_data_within_time_range_by_id(coingecko_api, **kwargs)
-        elif command_name == "Coin OHLC Chart by ID":
-            response = handle_coin_ohlc_chart_by_id(coingecko_api, **kwargs)
-        elif command_name == "Coin Data by Token Address": # Contract
-            response = handle_coin_data_by_token_address(coingecko_api, **kwargs)
-        elif command_name == "Coin Historical Chart Data by Token Address":
-            response = handle_coin_historical_chart_data_by_token_address(coingecko_api, **kwargs)
-        elif command_name == "Coin Historical Chart Data within Time Range by Token Address":
-            response = handle_coin_historical_chart_data_within_time_range_by_token_address(coingecko_api, **kwargs)
-        elif command_name == "Asset Platforms List (ID Map)": # Asset Platforms
-            response = handle_asset_platforms_list(coingecko_api, **kwargs)
-        elif command_name == "Coins Categories List (ID Map)": # Categories
-            response = handle_coins_categories_list(coingecko_api)
-
-        # Coins Categories List with Market Data
-        elif command_name == "Exchanges List with data":
-            response = handle_exchanges_list_with_data(coingecko_api, **kwargs)
-        elif command_name == "Exchanges List (ID Map)":
-            response = handle_exchanges_list(coingecko_api, **kwargs)
-        elif command_name == "Exchange Data by ID":
-            response = handle_exchange_data_by_id(coingecko_api, **kwargs)
-        elif command_name == "Exchange Tickers by ID":
-            response = handle_exchange_tickers_by_id(coingecko_api, **kwargs)
-        elif command_name == "Exchange Volume Chart by ID":
-            response = handle_exchange_volume_chart_by_id(coingecko_api, **kwargs)
-        elif command_name == "Derivatives Tickers List": # Derivates
-            response = handle_derivatives_tickers_list(coingecko_api)
-        elif command_name == "Derivatives Exchanges List with Data":
-            response = handle_derivatives_exchanges_list_with_data(coingecko_api, **kwargs)
-        elif command_name == "Derivatives Exchange Data by ID":
-            response = handle_derivatives_exchange_data_by_id(coingecko_api, **kwargs)
-        elif command_name == "Derivatives Exchanges List (ID Map)":
-            response = handle_derivatives_exchanges_list(coingecko_api)
-        elif command_name == "NFTs List (ID Map)": # NFTs (Beta)
-            response = handle_nfts_list(coingecko_api, **kwargs)
-        elif command_name == "NFTs Collection Data by ID":
-            response = handle_nfts_collection_data_by_id(coingecko_api, **kwargs)
-        elif command_name == "NFTs Collection Data by Contract Address":
-            response = handle_nfts_collection_data_by_contract_address(coingecko_api, **kwargs)
-        elif command_name == "BTC-to-Currency Exchange Rates": # Exchange Rates
-            response = handle_btc_to_currency_exchange_rates(coingecko_api)
-        elif command_name == "Search Queries": # Search
-            response = handle_search_queries(coingecko_api, **kwargs)
-        elif command_name == "Trending Search List": # Trending
-            response = handle_trending_search_list(coingecko_api)
-        elif command_name == "Crypto Global Market Data": # Global
-            response = handle_crypto_global_market_data(coingecko_api)
-        elif command_name == "Global De-Fi Market Data":
-            response = handle_global_defi_market_data(coingecko_api)
-        elif command_name == "Public Companies Holdings": # Companies (Beta)
-            response = handle_public_companies_holdings(coingecko_api, **kwargs)
-        else:
-            response = "Command not found"
-
-        # Response, prompt, transaction, cost
-        return str(response), None, None, None
-    except Exception as e:
-        return f"An error occurred: {str(e)}", None, None, None
     
 def handle_check_api_server_status(coingecko_api):
     return coingecko_api.check_api_server_status()
 
 def handle_coin_price_by_id(coingecko_api, **kwargs):
-    ids = kwargs.get("ids", None)   
-    vs_currencies = kwargs.get("vs_currencies", None)
-    include_market_cap = kwargs.get("include_market_cap", False)        
-    include_24hr_vol = kwargs.get("include_24hr_vol", False)
-    include_24hr_change = kwargs.get("include_24hr_change", False)
-    include_last_updated_at = kwargs.get("include_last_updated_at", False)
-    precision = kwargs.get("precision", None)
-    return coingecko_api.coin_price_by_id(ids, vs_currencies, include_market_cap, include_24hr_vol, include_24hr_change, include_last_updated_at, precision)
+    query_params = kwargs.get("query_params", None)
+    return coingecko_api.coin_price_by_id(query_params)
 
 def handle_coin_price_by_token_address(coingecko_api, **kwargs):
     id = kwargs.get("id", None)
@@ -1536,3 +1332,115 @@ def handle_global_defi_market_data(coingecko_api):
 def handle_public_companies_holdings(coingecko_api, **kwargs):
     coin_id = kwargs.get("coin_id", None)
     return coingecko_api.public_companies_holdings(coin_id)
+
+
+coingecko_commands = {
+    "Check API server status": handle_check_api_server_status,
+    "Coin Price by IDs and Symbols": handle_coin_price_by_id,
+    "Coin Price by Token Addresses": handle_coin_price_by_token_address,
+    "Supported Currencies List": handle_supported_currencies_list,
+    "Coins List (ID Map)": handle_coins_list,
+    "Coins List with Market Data": handle_coins_list_with_market_data,
+    "Coin Data by ID": handle_coin_data_by_id,
+    "Coin Tickers by ID": handle_coin_tickers_by_id,
+    "Coin Historical Data by ID": handle_coin_historical_data_by_id,
+    "Coin Historical Chart Data by ID": handle_coin_historical_chart_data_by_id,
+    "Coin Historical Chart Data within Time Range by ID": handle_coin_historical_chart_data_within_time_range_by_id,
+    "Coin OHLC Chart by ID": handle_coin_ohlc_chart_by_id,
+    "Coin Data by Token Address": handle_coin_data_by_token_address,
+    "Coin Historical Chart Data by Token Address": handle_coin_historical_chart_data_by_token_address,
+    "Coin Historical Chart Data within Time Range by Token Address": handle_coin_historical_chart_data_within_time_range_by_token_address,
+    "Asset Platforms List (ID Map)": handle_asset_platforms_list,
+    "Coins Categories List (ID Map)": handle_coins_categories_list,
+    "Exchanges List with data": handle_exchanges_list_with_data,
+    "Exchanges List (ID Map)": handle_exchanges_list,
+    "Exchange Data by ID": handle_exchange_data_by_id,
+    "Exchange Tickers by ID": handle_exchange_tickers_by_id,
+    "Exchange Volume Chart by ID": handle_exchange_volume_chart_by_id,
+    "Derivatives Tickers List": handle_derivatives_tickers_list,
+    "Derivatives Exchanges List with Data": handle_derivatives_exchanges_list_with_data,
+    "Derivatives Exchange Data by ID": handle_derivatives_exchange_data_by_id,
+    "Derivatives Exchanges List (ID Map)": handle_derivatives_exchanges_list,
+    "NFTs List (ID Map)": handle_nfts_list,
+    "NFTs Collection Data by ID": handle_nfts_collection_data_by_id,
+    "NFTs Collection Data by Contract Address": handle_nfts_collection_data_by_contract_address,
+    "BTC-to-Currency Exchange Rates": handle_btc_to_currency_exchange_rates,
+    "Search Queries": handle_search_queries,
+    "Trending Search List": handle_trending_search_list,
+    "Crypto Global Market Data": handle_crypto_global_market_data,
+    "Global De-Fi Market Data": handle_global_defi_market_data,
+    "Public Companies Holdings": handle_public_companies_holdings
+}
+
+
+MechResponse = Tuple[str, Optional[str], Optional[Dict[str, Any]], Any, Any]
+
+
+def with_key_rotation(func: Callable):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs) -> MechResponse:
+        api_keys = kwargs["api_keys"]
+        retries_left: Dict[str, int] = api_keys.max_retries()
+
+        def execute() -> MechResponse:
+            """Retry the function with a new key."""
+            try:
+                result = func(*args, **kwargs)
+                return result + (api_keys,)
+            except Exception as e:
+                service = e.__class__.__name__.lower()
+                if (
+                    hasattr(e, "status_code") and e.status_code == 429
+                ):  # If rate limit exceeded
+                    if retries_left.get(service, 0) <= 0:
+                        raise e
+                    retries_left[service] -= 1
+                    api_keys.rotate(service)
+                    return execute()
+
+                return str(e), "", None, None, api_keys
+
+        mech_response = execute()
+        return mech_response
+
+    return wrapper
+
+
+@with_key_rotation
+def run(**kwargs) -> Tuple[Optional[str], Optional[Dict[str, Any]], Any, Any]:
+    """
+    Main entry point for executing Coinbase Commerce API operations.
+
+    Args:
+        **kwargs: Keyword arguments including:
+            - tool: Name of the tool/operation to execute
+            - api_key: Coinbase Commerce API key
+            - Additional arguments specific to each tool
+
+    Returns:
+        A tuple containing:
+        - Response string from the API
+        - Optional prompt sent to the model
+        - Optional transaction generated by the tool
+        - Optional cost calculation object
+    """
+    api_keys = kwargs["api_keys"]
+    coingecko_api_key = api_keys.get("coingecko", None)
+    # Check that the tool has been specified
+    command_name = kwargs.get("prompt", None)
+
+    coingecko_api = CoingeckoAPI(coingecko_api_key)
+
+    if command_name is None:
+        return error_response("No command has been specified.")
+    
+    try:
+        if command_name.lower() in coingecko_commands.keys().lower():
+            response = coingecko_commands[command_name](coingecko_api, **kwargs)
+        else:
+            response = "Command not found. Please check the command name in prompt and try again."
+
+        # Response, prompt, transaction, cost
+        return str(response), None, None, None
+    except Exception as e:
+        return f"An error occurred: {str(e)}", None, None, None
